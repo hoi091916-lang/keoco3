@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kéo Co Đấu Trí - Tug of War Trivia</title>
+  <meta name="description" content="Trò chơi kéo co đối kháng trả lời câu hỏi trắc nghiệm đời sống và hiện tượng nổi tiếng.">
+  <!-- Tailwind CSS CDN for instant deployment without build tools -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body class="bg-stone-100 text-stone-900 h-screen w-screen overflow-hidden flex flex-col select-none font-sans">
+  <!-- Confetti Canvas for Victory -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- ================= VIEW 1: MENU CHÍNH ================= -->
+  <div id="view-menu" class="h-full w-full flex flex-col justify-between overflow-y-auto">
+    <!-- Menu Top Bar -->
+    <header class="px-4 py-3 shrink-0 flex items-center justify-between border-b border-stone-200 bg-white/80 backdrop-blur-xs">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-black shadow-xs">
+          🏆
+        </div>
+        <span class="font-extrabold text-sm sm:text-base tracking-tight text-stone-800">
+          KÉO CO ĐẤU TRÍ
+        </span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="menu-sound-toggle-btn" class="p-2 rounded-xl border border-stone-200 bg-white text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer hover:bg-stone-50" title="Bật/Tắt âm thanh">
+          <span id="menu-sound-icon">🔊</span>
+          <span id="menu-sound-text" class="hidden sm:inline">Âm thanh: BẬT</span>
+        </button>
+        <button id="menu-guide-toggle-btn" class="p-2 rounded-xl border border-stone-200 bg-white text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer hover:bg-stone-50" title="Xem phím bấm">
+          ⌨️ <span class="hidden sm:inline">Phím Chơi</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Menu Content -->
+    <div class="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 md:p-8 flex flex-col justify-center items-center">
+      <!-- Hero Title -->
+      <div class="text-center mb-6 max-w-xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 border border-amber-300 text-amber-800 text-xs font-bold mb-3 shadow-2xs">
+          <span>🔥 Đối Kháng Trắc Nghiệm 2 Người & Đấu Máy AI</span>
+        </div>
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-stone-900 tracking-tight leading-tight">
+          KÉO CO ĐẤU TRÍ
+        </h1>
+        <p class="mt-2 text-xs sm:text-sm text-stone-600 font-medium">
+          Trả lời đúng và nhanh hơn đối thủ để kéo dây thừng về phía vạch đích của đội mình!
+        </p>
+      </div>
+
+      <!-- Animated Rope Teaser -->
+      <div class="w-full max-w-lg mb-8 p-3 rounded-2xl bg-white border border-stone-200 shadow-sm flex items-center justify-between relative overflow-hidden">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl animate-bounce">🔴</span>
+          <div class="text-left">
+            <div class="font-black text-xs text-rose-600">ĐỘI ĐỎ</div>
+            <div class="text-[10px] text-stone-400 font-mono">Phím 1, 2, 3, 4</div>
+          </div>
+        </div>
+        <div class="flex-1 mx-3 flex items-center justify-center relative">
+          <div class="h-2 w-full bg-amber-700 rounded-full shadow-inner flex items-center justify-center">
+            <div class="w-4 h-4 rounded-full bg-red-600 border-2 border-white shadow-md animate-pulse"></div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 flex-row-reverse text-right">
+          <span class="text-2xl animate-bounce">🔵</span>
+          <div>
+            <div class="font-black text-xs text-blue-600">ĐỘI XANH</div>
+            <div class="text-[10px] text-stone-400 font-mono">Phím ↑, ←, ↓, →</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2 Main Cards: 1. PLAY, 2. QUẢN LÝ CÂU HỎI -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 w-full max-w-3xl">
+        <!-- Card 1: Play -->
+        <div class="bg-white rounded-2xl sm:rounded-3xl border-2 border-amber-400 p-5 sm:p-6 shadow-lg flex flex-col justify-between hover:shadow-xl transition relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-28 h-28 bg-amber-500/10 rounded-bl-full pointer-events-none"></div>
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-black uppercase tracking-wider px-2.5 py-1 rounded-lg bg-amber-500 text-white shadow-xs">
+                Mục 1
+              </span>
+              <span class="text-xs text-amber-700 font-bold flex items-center gap-1">
+                ✨ 10 Câu đối kháng
+              </span>
+            </div>
+            <h2 class="text-2xl font-black text-stone-900 flex items-center gap-2">
+              <span>VÀO TRÒ CHƠI</span>
+              <span class="text-base text-amber-600 font-bold">(PLAY)</span>
+            </h2>
+            <p class="text-xs text-stone-600 mt-1.5 leading-relaxed">
+              Tham gia ngay ván đấu kéo co kịch tính giữa Đội Đỏ và Đội Xanh với đồ họa và âm thanh sống động.
+            </p>
+
+            <!-- Quick settings -->
+            <div class="mt-4 pt-3 border-t border-stone-100 space-y-2.5 text-xs">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="font-extrabold text-stone-800 text-xs">CHỌN ĐỐI THỦ:</span>
+                  <span id="menu-mode-indicator" class="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
+                    👥 Người vs Người
+                  </span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <button id="menu-mode-pvp" type="button" class="p-2.5 rounded-xl border-2 text-left transition cursor-pointer flex flex-col justify-between bg-amber-50 border-amber-500 text-amber-900 shadow-xs ring-1 ring-amber-400">
+                    <div class="flex items-center justify-between mb-1">
+                      <span class="text-base">👥</span>
+                      <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                    </div>
+                    <div class="font-extrabold text-xs text-stone-900">
+                      Chơi 2 Người (PvP)
+                    </div>
+                    <p class="text-[10px] text-stone-500 mt-0.5 leading-tight">
+                      2 người chơi trên cùng máy (Phím 1-4 & Mũi tên)
+                    </p>
+                  </button>
+                  <button id="menu-mode-bot" type="button" class="p-2.5 rounded-xl border-2 text-left transition cursor-pointer flex flex-col justify-between border-stone-200 bg-stone-50/60 text-stone-600 hover:bg-stone-100">
+                    <div class="flex items-center justify-between mb-1">
+                      <span class="text-base">🤖</span>
+                    </div>
+                    <div class="font-extrabold text-xs text-stone-900">
+                      Chơi Với Máy (AI)
+                    </div>
+                    <p class="text-[10px] text-stone-500 mt-0.5 leading-tight">
+                      Bạn đấu với Máy AI tự động trả lời thông minh
+                    </p>
+                  </button>
+                </div>
+              </div>
+              <div>
+                <span class="font-bold text-stone-700 block mb-1">Mức độ thử thách:</span>
+                <select id="menu-difficulty-select" class="w-full p-1.5 rounded-lg border border-stone-200 bg-stone-50 text-stone-800 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-amber-500">
+                  <option value="progressive" selected>Tăng Tiến 10 Câu (Khuyên Dùng)</option>
+                  <option value="nhanh">Nhanh (Phản xạ & Mẹo sống)</option>
+                  <option value="vua">Vừa (Hiện tượng thường thức)</option>
+                  <option value="kho">Khó (Kỳ quan & Vũ trụ)</option>
+                  <option value="chuyen_gia">Chuyên Gia (Lượng tử & Vật lý)</option>
+                </select>
+              </div>
+
+              <!-- Customizable Time Per Question in Menu -->
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="font-bold text-stone-700">⏱️ Thời gian mỗi câu:</span>
+                  <span id="menu-time-display" class="font-mono font-bold text-amber-700 bg-amber-100 px-1.5 py-0.2 rounded text-[11px]">12s</span>
+                </div>
+                <div class="grid grid-cols-4 gap-1 mb-1">
+                  <button type="button" data-time="8" class="menu-time-btn py-1 rounded-lg border border-stone-200 text-[11px] font-bold text-stone-600 hover:bg-stone-50 cursor-pointer">8s</button>
+                  <button type="button" data-time="10" class="menu-time-btn py-1 rounded-lg border border-stone-200 text-[11px] font-bold text-stone-600 hover:bg-stone-50 cursor-pointer">10s</button>
+                  <button type="button" data-time="12" class="menu-time-btn py-1 rounded-lg border border-amber-600 bg-amber-500 text-white text-[11px] font-bold cursor-pointer">12s ★</button>
+                  <button type="button" data-time="15" class="menu-time-btn py-1 rounded-lg border border-stone-200 text-[11px] font-bold text-stone-600 hover:bg-stone-50 cursor-pointer">15s</button>
+                </div>
+                <div class="flex items-center justify-between p-1 bg-stone-50 rounded-lg border border-stone-200 text-[11px]">
+                  <span class="text-stone-500 font-medium pl-1">Tùy chỉnh:</span>
+                  <div class="flex items-center gap-1">
+                    <button id="menu-time-minus" type="button" class="w-5 h-5 rounded bg-white border border-stone-300 font-bold flex items-center justify-center hover:bg-stone-100 cursor-pointer">-</button>
+                    <input id="menu-time-input" type="number" min="3" max="60" value="12" class="w-10 text-center font-mono font-bold bg-white border border-stone-300 rounded py-0.5 text-xs">
+                    <button id="menu-time-plus" type="button" class="w-5 h-5 rounded bg-white border border-stone-300 font-bold flex items-center justify-center hover:bg-stone-100 cursor-pointer">+</button>
+                    <span class="text-stone-400 font-mono pr-1">giây</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button id="menu-btn-play" class="mt-5 w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-md transition cursor-pointer active:scale-98">
+            ▶️ <span>BẮT ĐẦU CHƠI NGAY</span> ➔
+          </button>
+        </div>
+
+        <!-- Card 2: Quản Lý Câu Hỏi -->
+        <div class="bg-white rounded-2xl sm:rounded-3xl border border-stone-200 p-5 sm:p-6 shadow-sm flex flex-col justify-between hover:shadow-md hover:border-stone-300 transition relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-28 h-28 bg-sky-500/10 rounded-bl-full pointer-events-none"></div>
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-black uppercase tracking-wider px-2.5 py-1 rounded-lg bg-sky-600 text-white shadow-xs">
+                Mục 2
+              </span>
+              <span class="text-xs text-sky-700 font-bold flex items-center gap-1">
+                📖 Kho Đề Mở
+              </span>
+            </div>
+            <h2 class="text-2xl font-black text-stone-900 flex items-center gap-2">
+              <span>QUẢN LÝ CÂU HỎI</span>
+            </h2>
+            <p class="text-xs text-stone-600 mt-1.5 leading-relaxed">
+              Tự do sáng tạo, thêm mới, sửa hoặc xóa các câu hỏi trắc nghiệm của riêng bạn để chơi kéo co!
+            </p>
+
+            <div class="mt-4 pt-3 border-t border-stone-100 space-y-2 text-xs">
+              <div class="flex items-center gap-2 text-stone-700">
+                <span class="w-5 h-5 rounded-md bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs shrink-0">+</span>
+                <span><strong>Thêm câu hỏi mới:</strong> Soạn thảo câu hỏi & 4 đáp án</span>
+              </div>
+              <div class="flex items-center gap-2 text-stone-700">
+                <span class="w-5 h-5 rounded-md bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-xs shrink-0">✏️</span>
+                <span><strong>Chỉnh sửa linh hoạt:</strong> Đổi nội dung, giải thích & độ khó</span>
+              </div>
+              <div class="flex items-center gap-2 text-stone-700">
+                <span class="w-5 h-5 rounded-md bg-rose-100 text-rose-600 flex items-center justify-center font-bold text-xs shrink-0">🗑️</span>
+                <span><strong>Xóa & Lọc:</strong> Tìm kiếm và dọn dẹp câu hỏi theo chủ đề</span>
+              </div>
+
+              <div class="p-2.5 rounded-xl bg-stone-50 border border-stone-200 mt-3 flex items-center justify-between">
+                <span class="text-stone-500 font-medium">Hiện có trong ngân hàng:</span>
+                <span id="menu-question-count-badge" class="font-extrabold text-stone-900">
+                  -- câu hỏi
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <button id="menu-btn-questions" class="mt-5 w-full py-3 px-4 rounded-xl border-2 border-sky-600 hover:bg-sky-50 text-sky-700 font-extrabold text-sm flex items-center justify-center gap-2 transition cursor-pointer active:scale-98">
+            📚 <span>MỞ QUẢN LÝ CÂU HỎI</span> ➔
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Menu Footer -->
+    <footer class="py-2 px-4 text-center text-[11px] text-stone-500 border-t border-stone-200 bg-white/60">
+      Kéo Co Đấu Trí Trivia • Lưu trữ câu hỏi trực tiếp trên trình duyệt
+    </footer>
+  </div>
+
+  <!-- ================= VIEW 2: TRÒ CHƠI KÉO CO (GAME) ================= -->
+  <div id="view-game" class="hidden h-full w-full flex-col justify-between overflow-hidden">
+    <!-- Top Navigation Bar -->
+    <header class="w-full border-b border-stone-200 bg-white/90 backdrop-blur-sm px-3 sm:px-4 py-1.5 shrink-0 z-30">
+      <div class="max-w-6xl mx-auto flex items-center justify-between">
+        <!-- Title & Branding -->
+        <div class="flex items-center gap-2">
+          <!-- Back to Menu Button -->
+          <button id="game-btn-back-menu" class="p-1.5 px-2.5 rounded-lg border border-stone-200 hover:bg-stone-100 text-stone-700 text-xs font-bold flex items-center gap-1 transition cursor-pointer" title="Quay lại Menu chính">
+            🏠 <span class="hidden sm:inline text-[11px]">Menu</span>
+          </button>
+
+          <div class="w-7 h-7 rounded-lg bg-amber-500 text-white flex items-center justify-center font-black text-sm shadow-sm">
+            🪢
+          </div>
+          <div>
+            <h1 class="font-extrabold text-sm sm:text-base tracking-tight leading-none text-stone-900">
+              KÉO CO ĐẤU TRÍ
+            </h1>
+            <p class="text-[10px] text-stone-500 font-medium">Trắc nghiệm đối kháng 10 câu</p>
+          </div>
+        </div>
+
+        <!-- BẢNG TỔNG THỜI GIAN ĐÃ CHƠI (TRÊN ĐẦU MÀN HÌNH) -->
+        <div id="match-timer-board" class="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 bg-amber-500/10 border border-amber-300 rounded-xl shadow-xs" title="Bảng tổng thời gian đã chơi trong trận này">
+          <span class="text-sm">⏱️</span>
+          <div class="flex flex-col sm:flex-row sm:items-center sm:gap-1.5 leading-none">
+            <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-amber-900 whitespace-nowrap">
+              THỜI GIAN TRẬN
+            </span>
+            <span id="match-elapsed-timer-display" class="font-mono font-black text-xs sm:text-sm text-stone-900 bg-white px-1.5 py-0.5 rounded-md border border-amber-200 tracking-wider">
+              00:00
+            </span>
+          </div>
+        </div>
+
+        <!-- Quick Mode Switcher: 2 Người (PvP) vs Đấu Máy (AI) -->
+        <div id="game-mode-toggle-group" class="flex items-center p-0.5 bg-stone-100 border border-stone-200 rounded-xl shadow-2xs" title="Chọn đối thủ: Chơi 2 người hoặc Đấu với máy">
+          <button id="quick-mode-pvp-btn" type="button" class="px-2 py-1 rounded-lg text-[11px] font-extrabold flex items-center gap-1 transition cursor-pointer bg-white text-rose-600 border border-stone-200 shadow-2xs">
+            👥 <span class="hidden sm:inline">2 Người (PvP)</span><span class="sm:hidden">2 Người</span>
+          </button>
+          <button id="quick-mode-bot-btn" type="button" class="px-2 py-1 rounded-lg text-[11px] font-extrabold flex items-center gap-1 transition cursor-pointer text-stone-500 hover:text-stone-800">
+            🤖 <span class="hidden sm:inline">Với Máy (AI)</span><span class="sm:hidden">Với Máy</span>
+          </button>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center gap-1 sm:gap-2">
+          <!-- Question Manager Shortcut -->
+          <button id="game-btn-questions" class="p-1.5 px-2 rounded-lg border border-stone-200 hover:bg-stone-50 text-stone-700 text-xs font-semibold flex items-center gap-1 transition cursor-pointer" title="Quản lý câu hỏi">
+            📚 <span class="hidden md:inline text-[11px]">Câu Hỏi</span>
+          </button>
+
+          <!-- Sound Toggle -->
+          <button id="sound-toggle-btn" class="p-1.5 rounded-lg border border-stone-200 hover:bg-stone-50 text-emerald-600 transition" title="Bật/Tắt âm thanh">
+            🔊
+          </button>
+
+          <!-- Keyboard Guide Toggle -->
+          <button id="guide-toggle-btn" class="p-1.5 rounded-lg border border-stone-200 hover:bg-stone-50 text-stone-600 transition text-xs font-semibold flex items-center gap-1">
+            ⌨️ <span class="hidden sm:inline">Phím chơi</span>
+          </button>
+
+          <!-- Restart Match -->
+          <button id="restart-match-btn" class="p-1.5 rounded-lg border border-stone-200 hover:bg-stone-50 text-stone-600 transition text-xs font-semibold flex items-center gap-1" title="Chơi lại ván mới">
+            🔄 <span class="hidden sm:inline">Ván mới</span>
+          </button>
+
+          <!-- Settings Modal Trigger -->
+          <button id="open-settings-btn" class="p-1.5 rounded-lg border border-stone-200 hover:bg-stone-50 text-stone-600 transition text-xs font-semibold" title="Cài đặt luật & độ khó">
+            ⚙️
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Keyboard Guide Banner (Collapsible) -->
+    <div id="guide-bar" class="hidden bg-amber-50 border-b border-amber-200 py-1 px-3 text-[11px] text-amber-900 shrink-0">
+      <div class="max-w-6xl mx-auto flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span>🔴 <strong>Đội Đỏ (Trái):</strong> Phím số <kbd class="px-1.5 py-0.5 bg-white border border-amber-300 rounded font-mono font-bold">1</kbd> <kbd class="px-1.5 py-0.5 bg-white border border-amber-300 rounded font-mono font-bold">2</kbd> <kbd class="px-1.5 py-0.5 bg-white border border-amber-300 rounded font-mono font-bold">3</kbd> <kbd class="px-1.5 py-0.5 bg-white border border-amber-300 rounded font-mono font-bold">4</kbd></span>
+          <span class="text-amber-300">|</span>
+          <span>🔵 <strong>Đội Xanh (Phải):</strong> Phím mũi tên <kbd class="px-1 py-0.5 bg-white border border-amber-300 rounded font-mono font-bold">↑</kbd> <kbd class="px-1 py-0.5 bg-white border border-amber-300 rounded font-mono font-bold">←</kbd> <kbd class="px-1 py-0.5 bg-white border border-amber-300 rounded font-mono font-bold">↓</kbd> <kbd class="px-1 py-0.5 bg-white border border-amber-300 rounded font-mono font-bold">→</kbd> hoặc <kbd class="px-1 py-0.5 bg-white border border-amber-300 rounded font-mono font-bold">I J K L</kbd></span>
+        </div>
+        <button id="close-guide-btn" class="text-stone-400 hover:text-stone-600 text-[10px] underline">Đóng</button>
+      </div>
+    </div>
+
+    <!-- Main Viewport (Fits 100% within single screen) -->
+    <main class="flex-1 min-h-0 max-w-6xl w-full mx-auto p-2 sm:p-2.5 flex flex-col gap-2 justify-between overflow-hidden">
+      <!-- 1. Tug of War Arena -->
+      <section id="arena-container" class="relative w-full overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-b from-amber-50/90 via-orange-50/70 to-amber-100/90 border border-amber-200/90 shadow-inner shrink-0">
+        <!-- Top Arena Header -->
+        <div class="flex items-center justify-between px-2.5 sm:px-4 py-1 sm:py-1.5 border-b border-amber-200/50 text-xs font-medium">
+          <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
+            <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse shrink-0"></span>
+            <span class="font-bold text-xs sm:text-sm text-rose-600 truncate">Đội Đỏ</span>
+            <span id="left-score-display" class="bg-rose-100 text-rose-700 font-bold px-1.5 py-0.2 rounded-full text-[10px] sm:text-xs shrink-0">
+              0
+            </span>
+          </div>
+
+          <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+            <span id="round-display" class="font-bold text-[10px] sm:text-xs text-amber-900 bg-amber-200/70 px-2 py-0.5 rounded-full border border-amber-300">
+              CÂU 1/10
+            </span>
+            <div class="hidden sm:flex flex-col items-center">
+              <div id="meter-text" class="flex items-center gap-1 text-stone-600 font-mono font-bold text-[10px] sm:text-[11px] tracking-wider">
+                0m | GIỮA | 0m
+              </div>
+              <div class="w-24 sm:w-32 h-1 bg-stone-200 rounded-full mt-0.5 relative overflow-hidden">
+                <div class="absolute left-1/2 top-0 bottom-0 w-0.5 bg-stone-400 -translate-x-1/2 z-10"></div>
+                <div id="meter-pointer" class="absolute top-0 bottom-0 w-2 bg-amber-500 rounded-full shadow transition-all duration-300 -translate-x-1/2" style="left: 50%;"></div>
+              </div>
+            </div>
+            <div class="flex items-center gap-1 font-mono font-bold text-xs sm:text-sm text-amber-700 bg-white/80 px-2 py-0.5 rounded-lg border border-amber-200 shadow-2xs">
+              ⏱️ <span id="timer-display">12s</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1.5 sm:gap-2 min-w-0 justify-end">
+            <span id="right-score-display" class="bg-blue-100 text-blue-700 font-bold px-1.5 py-0.2 rounded-full text-[10px] sm:text-xs shrink-0">
+              0
+            </span>
+            <span id="right-team-title" class="font-bold text-xs sm:text-sm text-blue-600 truncate">Đội Xanh</span>
+            <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse shrink-0"></span>
+          </div>
+        </div>
+
+        <!-- Visual Stage for Characters & Rope -->
+        <div id="tug-stage" class="relative h-20 sm:h-24 w-full flex items-center justify-center overflow-hidden">
+          <div class="absolute inset-0 flex justify-between pointer-events-none opacity-20 px-8">
+            <div class="border-r-2 border-dashed border-rose-600 h-full"></div>
+            <div class="border-r-2 border-stone-400 h-full"></div>
+            <div class="border-r-2 border-dashed border-blue-600 h-full"></div>
+          </div>
+
+          <div id="rope-rig" class="relative flex items-center transition-transform duration-500 ease-out" style="transform: translateX(0px);">
+            <!-- Left Character -->
+            <div id="left-character" class="relative flex items-center select-none pr-1">
+              <span class="text-3xl sm:text-4xl drop-shadow filter transition-transform duration-200 inline-block -scale-x-100">
+                🏃
+              </span>
+              <div class="text-[9px] font-bold text-white bg-rose-600 px-1 py-0.2 rounded absolute -top-1 left-0 shadow-xs">
+                ĐỎ
+              </div>
+            </div>
+
+            <!-- Stretched Rope -->
+            <div class="relative w-44 sm:w-64 h-3 bg-amber-800 rounded-full shadow flex items-center justify-center border border-amber-950">
+              <div class="absolute inset-0 bg-repeating-linear-gradient opacity-30 rounded-full"></div>
+              <div id="rope-ribbon" class="w-4 h-4 bg-red-600 border-2 border-white rounded-full shadow-md z-10"></div>
+            </div>
+
+            <!-- Right Character -->
+            <div id="right-character" class="relative flex items-center select-none pl-1">
+              <span class="text-3xl sm:text-4xl drop-shadow filter transition-transform duration-200 inline-block">
+                🏃
+              </span>
+              <div id="right-char-badge" class="text-[9px] font-bold text-white bg-blue-600 px-1 py-0.2 rounded absolute -top-1 right-0 shadow-xs">
+                XANH
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feedback message banner -->
+        <div id="evaluation-banner" class="hidden py-1 px-3 text-center text-xs font-bold border-t transition-all"></div>
+      </section>
+
+      <!-- 2. Dual Team Stations: Left (Red) & Right (Blue) -->
+      <section class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-2 min-h-0 overflow-hidden">
+        <!-- Station Left: ĐỘI ĐỎ -->
+        <div id="station-left" class="flex flex-col justify-between rounded-xl sm:rounded-2xl border border-rose-200 bg-white p-2 sm:p-3 shadow-xs overflow-hidden">
+          <div class="border-b border-rose-100 pb-1.5 shrink-0 flex items-center justify-between">
+            <div class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+              <h2 class="font-extrabold text-xs sm:text-sm text-rose-700">ĐỘI ĐỎ (BÊN TRÁI)</h2>
+            </div>
+            <span id="left-answered-pill" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-stone-100 text-stone-500">
+              Chờ chọn phím...
+            </span>
+          </div>
+
+          <div class="my-1 sm:my-1.5 p-2 rounded-xl bg-rose-50/50 border border-rose-100 flex-1 flex flex-col justify-center min-h-0">
+            <div class="flex items-center gap-1 text-[10px] font-bold text-rose-600 mb-0.5">
+              <span id="left-q-category">Mẹo Sống & Sơ Cứu</span> • <span id="left-q-diff">NHANH</span>
+            </div>
+            <p id="left-question-text" class="font-bold text-xs sm:text-sm text-stone-800 leading-snug line-clamp-3">
+              Đang tải câu hỏi...
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 gap-1 sm:gap-1.5 shrink-0">
+            <button class="opt-btn-left flex items-center gap-2 p-1.5 sm:p-2 rounded-xl border border-stone-200 text-left transition hover:border-rose-300 cursor-pointer active:scale-98" data-index="0">
+              <span class="w-5 h-5 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center font-bold text-xs shrink-0">1</span>
+              <span class="opt-text text-xs text-stone-800 font-medium truncate">...</span>
+            </button>
+            <button class="opt-btn-left flex items-center gap-2 p-1.5 sm:p-2 rounded-xl border border-stone-200 text-left transition hover:border-rose-300 cursor-pointer active:scale-98" data-index="1">
+              <span class="w-5 h-5 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center font-bold text-xs shrink-0">2</span>
+              <span class="opt-text text-xs text-stone-800 font-medium truncate">...</span>
+            </button>
+            <button class="opt-btn-left flex items-center gap-2 p-1.5 sm:p-2 rounded-xl border border-stone-200 text-left transition hover:border-rose-300 cursor-pointer active:scale-98" data-index="2">
+              <span class="w-5 h-5 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center font-bold text-xs shrink-0">3</span>
+              <span class="opt-text text-xs text-stone-800 font-medium truncate">...</span>
+            </button>
+            <button class="opt-btn-left flex items-center gap-2 p-1.5 sm:p-2 rounded-xl border border-stone-200 text-left transition hover:border-rose-300 cursor-pointer active:scale-98" data-index="3">
+              <span class="w-5 h-5 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center font-bold text-xs shrink-0">4</span>
+              <span class="opt-text text-xs text-stone-800 font-medium truncate">...</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Station Right: ĐỘI XANH / MÁY -->
+        <div id="station-right" class="flex flex-col justify-between rounded-xl sm:rounded-2xl border border-blue-200 bg-white p-2 sm:p-3 shadow-xs overflow-hidden">
+          <div class="border-b border-blue-100 pb-1.5 shrink-0 flex items-center justify-between">
+            <div class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+              <h2 id="right-panel-title" class="font-extrabold text-xs sm:text-sm text-blue-700">ĐỘI XANH (BÊN PHẢI)</h2>
+            </div>
+            <span id="right-answered-pill" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-stone-100 text-stone-500">
+              Chờ chọn phím...
+            </span>
+          </div>
+
+          <div class="my-1 sm:my-1.5 p-2 rounded-xl bg-blue-50/50 border border-blue-100 flex-1 flex flex-col justify-center min-h-0">
+            <div class="flex items-center gap-1 text-[10px] font-bold text-blue-600 mb-0.5">
+              <span id="right-q-category">Mẹo Sống & Sơ Cứu</span> • <span id="right-q-diff">NHANH</span>
+            </div>
+            <p id="right-question-text" class="font-bold text-xs sm:text-sm text-stone-800 leading-snug line-clamp-3">
+              Đang tải câu hỏi...
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 gap-1 sm:gap-1.5 shrink-0">
+            <button class="opt-btn-right flex items-center gap-2 p-1.5 sm:p-2 rounded-xl border border-stone-200 text-left transition hover:border-blue-300 cursor-pointer active:scale-98" data-index="0">
+              <span class="w-5 h-5 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs shrink-0">↑</span>
+              <span class="opt-text text-xs text-stone-800 font-medium truncate">...</span>
+            </button>
+            <button class="opt-btn-right flex items-center gap-2 p-1.5 sm:p-2 rounded-xl border border-stone-200 text-left transition hover:border-blue-300 cursor-pointer active:scale-98" data-index="1">
+              <span class="w-5 h-5 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs shrink-0">←</span>
+              <span class="opt-text text-xs text-stone-800 font-medium truncate">...</span>
+            </button>
+            <button class="opt-btn-right flex items-center gap-2 p-1.5 sm:p-2 rounded-xl border border-stone-200 text-left transition hover:border-blue-300 cursor-pointer active:scale-98" data-index="2">
+              <span class="w-5 h-5 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs shrink-0">↓</span>
+              <span class="opt-text text-xs text-stone-800 font-medium truncate">...</span>
+            </button>
+            <button class="opt-btn-right flex items-center gap-2 p-1.5 sm:p-2 rounded-xl border border-stone-200 text-left transition hover:border-blue-300 cursor-pointer active:scale-98" data-index="3">
+              <span class="w-5 h-5 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs shrink-0">→</span>
+              <span class="opt-text text-xs text-stone-800 font-medium truncate">...</span>
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bottom Rules Summary -->
+    <footer class="w-full border-t border-stone-200 py-1 px-3 text-center text-[10px] text-stone-500 shrink-0 bg-white">
+      Trả lời đúng & nhanh hơn đối thủ để kéo dây. Đội kéo dây xa hơn sau 10 câu sẽ giành cúp vô địch!
+    </footer>
+  </div>
+
+  <!-- ================= VIEW 3: QUẢN LÝ CÂU HỎI ================= -->
+  <div id="view-questions" class="hidden h-full w-full flex-col overflow-hidden bg-stone-100">
+    <!-- Top Bar -->
+    <header class="bg-white border-b border-stone-200 px-3 sm:px-5 py-2.5 shrink-0 z-20">
+      <div class="max-w-6xl mx-auto flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2 sm:gap-3">
+          <button id="qmgr-btn-back-menu" class="p-1.5 sm:px-3 sm:py-1.5 rounded-xl border border-stone-200 hover:bg-stone-100 text-stone-700 text-xs sm:text-sm font-bold flex items-center gap-1.5 transition cursor-pointer">
+            ← <span class="hidden sm:inline">Menu Chính</span>
+          </button>
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-black text-sm">
+              📖
+            </div>
+            <div>
+              <h1 class="font-extrabold text-sm sm:text-base leading-tight">
+                Quản Lý Ngân Hàng Câu Hỏi
+              </h1>
+              <p class="text-[11px] text-stone-500 font-medium">
+                Tổng cộng: <strong id="qmgr-count-badge" class="text-amber-600">0</strong> câu hỏi trong kho
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button id="qmgr-btn-reset-default" class="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl border border-stone-200 hover:bg-stone-100 text-stone-600 text-xs font-semibold flex items-center gap-1 transition cursor-pointer" title="Khôi phục danh sách mặc định">
+            🔄 <span class="hidden md:inline">Khôi phục</span>
+          </button>
+          <button id="qmgr-btn-add" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-sm transition cursor-pointer">
+            ➕ <span>Thêm Câu Hỏi</span>
+          </button>
+          <button id="qmgr-btn-play-game" class="px-3 py-1.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-sm transition cursor-pointer">
+            ▶️ <span>Chơi Ngay</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Filters & Search Bar -->
+    <div class="bg-white border-b border-stone-200 px-3 sm:px-5 py-2 shrink-0">
+      <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+        <!-- Difficulty filter tabs -->
+        <div class="flex items-center gap-1 overflow-x-auto text-xs">
+          <button class="qmgr-tab-btn px-2.5 py-1 rounded-lg font-bold bg-amber-500 text-white cursor-pointer" data-diff="all">
+            Tất Cả
+          </button>
+          <button class="qmgr-tab-btn px-2.5 py-1 rounded-lg font-bold bg-stone-100 text-stone-600 hover:bg-stone-200 cursor-pointer" data-diff="nhanh">
+            Nhanh
+          </button>
+          <button class="qmgr-tab-btn px-2.5 py-1 rounded-lg font-bold bg-stone-100 text-stone-600 hover:bg-stone-200 cursor-pointer" data-diff="vua">
+            Vừa
+          </button>
+          <button class="qmgr-tab-btn px-2.5 py-1 rounded-lg font-bold bg-stone-100 text-stone-600 hover:bg-stone-200 cursor-pointer" data-diff="kho">
+            Khó
+          </button>
+          <button class="qmgr-tab-btn px-2.5 py-1 rounded-lg font-bold bg-stone-100 text-stone-600 hover:bg-stone-200 cursor-pointer" data-diff="chuyen_gia">
+            Chuyên Gia
+          </button>
+        </div>
+
+        <!-- Search box -->
+        <div class="relative w-full sm:w-64 shrink-0">
+          <input id="qmgr-search-input" type="text" placeholder="Tìm kiếm nội dung, chủ đề..." class="w-full pl-3 pr-7 py-1 text-xs rounded-lg border border-stone-200 bg-stone-50 text-stone-800 focus:outline-none focus:ring-1 focus:ring-amber-500">
+        </div>
+      </div>
+    </div>
+
+    <!-- Questions Cards List Container -->
+    <main id="qmgr-list-container" class="flex-1 overflow-y-auto p-3 sm:p-5">
+      <div id="qmgr-questions-list" class="max-w-6xl mx-auto space-y-2.5">
+        <!-- Rendered by JavaScript -->
+      </div>
+    </main>
+  </div>
+
+  <!-- ================= MODAL: THÊM / SỬA CÂU HỎI ================= -->
+  <div id="modal-question-form" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/70 backdrop-blur-xs">
+    <div class="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-stone-200 p-4 sm:p-6 max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-stone-200">
+        <div>
+          <h2 id="form-modal-title" class="text-base sm:text-lg font-bold text-stone-900">
+            ➕ Thêm Câu Hỏi Mới
+          </h2>
+          <p class="text-xs text-stone-500">Điền nội dung câu hỏi và 4 phương án trả lời</p>
+        </div>
+        <button id="form-btn-close" class="p-1.5 rounded-lg text-stone-400 hover:text-stone-600 hover:bg-stone-100 transition cursor-pointer">
+          ✕
+        </button>
+      </div>
+
+      <div id="form-error-box" class="hidden mt-3 p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold"></div>
+
+      <form id="question-edit-form" class="space-y-3 py-3 text-xs">
+        <input type="hidden" id="form-q-id" value="">
+        <div>
+          <label class="block font-bold text-stone-700 mb-1">Nội dung câu hỏi <span class="text-rose-500">*</span></label>
+          <textarea id="form-q-text" rows="3" class="w-full p-2.5 rounded-xl border border-stone-200 bg-white text-stone-900 font-medium focus:ring-1 focus:ring-amber-500 resize-none" placeholder="Nhập nội dung câu hỏi trắc nghiệm..." required></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">Chủ đề / Lĩnh vực</label>
+            <input id="form-q-category" type="text" class="w-full p-2 rounded-lg border border-stone-200 bg-white text-stone-900 font-medium focus:ring-1 focus:ring-amber-500" placeholder="Ví dụ: Mẹo Sống, Khoa Học...">
+          </div>
+          <div>
+            <label class="block font-bold text-stone-700 mb-1">Mức độ thử thách</label>
+            <select id="form-q-difficulty" class="w-full p-2 rounded-lg border border-stone-200 bg-white text-stone-900 font-medium focus:ring-1 focus:ring-amber-500">
+              <option value="nhanh">Nhanh (Phản xạ & Mẹo sống)</option>
+              <option value="vua">Vừa (Khoa học thường thức)</option>
+              <option value="kho">Khó (Kỳ quan & Danh tác)</option>
+              <option value="chuyen_gia">Chuyên Gia (Lượng tử & Vật lý)</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-stone-700 mb-1.5">4 Phương án (Chọn nút tròn để chỉ định đáp án đúng) <span class="text-rose-500">*</span></label>
+          <div class="space-y-2">
+            <div class="flex items-center gap-2 p-2 rounded-xl border border-stone-200">
+              <label class="flex items-center gap-1.5 cursor-pointer shrink-0">
+                <input type="radio" name="form-correct-radio" value="0" checked class="w-4 h-4 text-emerald-600 accent-emerald-600">
+                <span class="w-6 h-6 rounded-lg bg-stone-100 text-stone-700 flex items-center justify-center font-bold text-xs">A</span>
+              </label>
+              <input id="form-opt-0" type="text" class="flex-1 p-1.5 rounded-lg border border-stone-200 bg-white text-stone-900 font-medium" placeholder="Nội dung phương án A..." required>
+            </div>
+            <div class="flex items-center gap-2 p-2 rounded-xl border border-stone-200">
+              <label class="flex items-center gap-1.5 cursor-pointer shrink-0">
+                <input type="radio" name="form-correct-radio" value="1" class="w-4 h-4 text-emerald-600 accent-emerald-600">
+                <span class="w-6 h-6 rounded-lg bg-stone-100 text-stone-700 flex items-center justify-center font-bold text-xs">B</span>
+              </label>
+              <input id="form-opt-1" type="text" class="flex-1 p-1.5 rounded-lg border border-stone-200 bg-white text-stone-900 font-medium" placeholder="Nội dung phương án B..." required>
+            </div>
+            <div class="flex items-center gap-2 p-2 rounded-xl border border-stone-200">
+              <label class="flex items-center gap-1.5 cursor-pointer shrink-0">
+                <input type="radio" name="form-correct-radio" value="2" class="w-4 h-4 text-emerald-600 accent-emerald-600">
+                <span class="w-6 h-6 rounded-lg bg-stone-100 text-stone-700 flex items-center justify-center font-bold text-xs">C</span>
+              </label>
+              <input id="form-opt-2" type="text" class="flex-1 p-1.5 rounded-lg border border-stone-200 bg-white text-stone-900 font-medium" placeholder="Nội dung phương án C..." required>
+            </div>
+            <div class="flex items-center gap-2 p-2 rounded-xl border border-stone-200">
+              <label class="flex items-center gap-1.5 cursor-pointer shrink-0">
+                <input type="radio" name="form-correct-radio" value="3" class="w-4 h-4 text-emerald-600 accent-emerald-600">
+                <span class="w-6 h-6 rounded-lg bg-stone-100 text-stone-700 flex items-center justify-center font-bold text-xs">D</span>
+              </label>
+              <input id="form-opt-3" type="text" class="flex-1 p-1.5 rounded-lg border border-stone-200 bg-white text-stone-900 font-medium" placeholder="Nội dung phương án D..." required>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-stone-700 mb-1">Giải thích chi tiết (Hiện khi kết thúc câu)</label>
+          <textarea id="form-q-explanation" rows="2" class="w-full p-2 rounded-xl border border-stone-200 bg-white text-stone-900 font-medium focus:ring-1 focus:ring-amber-500 resize-none" placeholder="Giải thích lý do đáp án đúng..."></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-stone-200">
+          <button id="form-btn-cancel" type="button" class="px-4 py-2 rounded-xl border border-stone-200 text-stone-600 hover:bg-stone-100 font-bold cursor-pointer">
+            Hủy
+          </button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold shadow-sm cursor-pointer">
+            Lưu Câu Hỏi
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: CÀI ĐẶT TRẬN ĐẤU ================= -->
+  <div id="settings-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-stone-200">
+      <h3 class="text-base font-bold text-stone-900 mb-3 flex items-center gap-2">
+        ⚙️ Cài Đặt Trận Đấu Kéo Co
+      </h3>
+
+      <div class="mb-3">
+        <label class="block text-xs font-bold text-stone-700 mb-1">Hình thức thi đấu</label>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button id="mode-pvp-btn" class="p-2 rounded-xl border font-bold text-center transition cursor-pointer bg-amber-50 border-amber-500 text-amber-800">
+            👥 2 Người (PvP)
+          </button>
+          <button id="mode-bot-btn" class="p-2 rounded-xl border font-bold text-center transition cursor-pointer border-stone-200 text-stone-600 hover:bg-stone-50">
+            🤖 Đấu Máy (AI)
+          </button>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="block text-xs font-bold text-stone-700 mb-1">Cấp độ thử thách</label>
+        <select id="diff-select" class="w-full p-2 border border-stone-200 rounded-lg text-xs font-medium">
+          <option value="progressive" selected>Tăng tiến 10 câu (Khuyên dùng)</option>
+          <option value="nhanh">Nhanh (Phản xạ & Mẹo sống)</option>
+          <option value="vua">Vừa (Hiện tượng thường thức)</option>
+          <option value="kho">Khó (Kỳ quan & Danh tác)</option>
+          <option value="chuyen_gia">Chuyên Gia (Lượng tử & Vật lý)</option>
+        </select>
+      </div>
+
+      <div class="mb-4">
+        <div class="flex items-center justify-between mb-1">
+          <label class="block text-xs font-bold text-stone-700">Thời gian mỗi câu</label>
+          <span id="settings-time-val-display" class="font-mono font-bold text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.2 rounded text-[11px]">12s/câu</span>
+        </div>
+        <select id="time-select" class="w-full p-2 border border-stone-200 rounded-lg text-xs font-medium mb-1.5">
+          <option value="5">5 giây (Siêu tốc)</option>
+          <option value="8">8 giây (Cực gắt)</option>
+          <option value="10">10 giây (Nhanh)</option>
+          <option value="12" selected>12 giây (Tiêu chuẩn)</option>
+          <option value="15">15 giây (Thong thả)</option>
+          <option value="20">20 giây (Nhiều thời gian)</option>
+          <option value="30">30 giây (Suy ngẫm)</option>
+        </select>
+        <div class="flex items-center justify-between p-1.5 bg-stone-50 rounded-lg border border-stone-200 text-xs">
+          <span class="text-stone-600 font-semibold">Tùy chỉnh số giây:</span>
+          <div class="flex items-center gap-1">
+            <button id="settings-time-minus" type="button" class="w-6 h-6 rounded bg-white border border-stone-300 font-bold flex items-center justify-center hover:bg-stone-100 cursor-pointer">-</button>
+            <input id="settings-time-custom" type="number" min="3" max="60" value="12" class="w-12 text-center font-mono font-bold bg-white border border-stone-300 rounded py-0.5 text-xs">
+            <button id="settings-time-plus" type="button" class="w-6 h-6 rounded bg-white border border-stone-300 font-bold flex items-center justify-center hover:bg-stone-100 cursor-pointer">+</button>
+            <span class="text-stone-400 font-mono text-[11px]">giây</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2">
+        <button id="cancel-settings-btn" class="px-3 py-1.5 rounded-lg border border-stone-200 text-stone-600 hover:bg-stone-100 text-xs font-bold cursor-pointer">
+          Hủy
+        </button>
+        <button id="save-settings-btn" class="px-4 py-1.5 rounded-lg bg-stone-900 text-white hover:bg-stone-800 text-xs font-bold cursor-pointer">
+          Lưu & Chơi Mới
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: KẾT QUẢ VÁN ĐẤU ================= -->
+  <div id="result-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-5 text-center shadow-2xl border border-stone-200">
+      <div id="result-title" class="text-xl sm:text-2xl font-black text-rose-600 mb-1">
+        🏆 ĐỘI ĐỎ CHIẾN THẮNG!
+      </div>
+      <div class="text-xs text-stone-400 font-mono mb-2">KẾT QUẢ CHUNG CUỘC</div>
+      <div id="result-score" class="text-3xl font-black text-stone-900 mb-2">
+        7 - 3
+      </div>
+      <p id="result-desc" class="text-xs text-stone-600 mb-4 leading-relaxed">
+        Đội Đỏ xuất sắc kéo dây về phía mình với 7 câu trả lời đúng!
+      </p>
+
+      <!-- Total Match Time Display in Result -->
+      <div id="result-time-box" class="mb-4 py-2 px-3 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between text-xs">
+        <span class="font-bold text-amber-900 flex items-center gap-1">
+          ⏱️ Tổng Thời Gian Trận Đấu:
+        </span>
+        <span id="result-time-display" class="font-mono font-black text-sm text-stone-900 bg-white px-2 py-0.5 rounded-lg border border-amber-300">
+          00:00
+        </span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="result-menu-btn" class="flex-1 py-2.5 rounded-xl border border-stone-200 hover:bg-stone-100 text-stone-700 font-bold text-xs sm:text-sm transition cursor-pointer">
+          🏠 Menu Chính
+        </button>
+        <button id="result-restart-btn" class="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs sm:text-sm shadow-md transition cursor-pointer active:scale-95">
+          Chơi Lại 🔄
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Game Script -->
+  <script src="./app.js"></script>
+</body>
+</html>

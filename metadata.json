@@ -1,0 +1,6 @@
+{
+  "name": "Kéo Co Đấu Trí - Tug of War Trivia",
+  "description": "Trò chơi kéo co đối kháng trả lời câu hỏi đời sống và hiện tượng nổi tiếng theo các cấp độ nhanh, vừa, khó và chuyên gia.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
