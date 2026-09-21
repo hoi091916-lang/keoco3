@@ -915,7 +915,15 @@ class TugOfWarApp {
       if (this.currentView !== 'game') return;
       if (!this.el.settingsModal.classList.contains('hidden') || !this.el.resultModal.classList.contains('hidden')) return;
 
-      if (this.isEvaluating || this.isGameOver) return;
+      if (this.isGameOver) return;
+
+      if (this.isEvaluating) {
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          this.advanceNextRoundImmediately();
+        }
+        return;
+      }
 
       // Left Team keys: 1, 2, 3, 4
       if (['1', '2', '3', '4'].includes(e.key)) {
@@ -1234,6 +1242,7 @@ class TugOfWarApp {
   startNewMatch() {
     clearInterval(this.timerInterval);
     clearTimeout(this.botTimer);
+    if (this.roundEvalTimeout) clearTimeout(this.roundEvalTimeout);
 
     this.matchQuestions = this.selectQuestions(this.difficulty, this.totalRounds);
     this.currentRoundIndex = 0;
@@ -1483,15 +1492,24 @@ class TugOfWarApp {
 
     this.updateArenaUI();
 
-    // Move to next question after 3.2s
-    setTimeout(() => {
-      if (this.currentView !== 'game') return;
-      if (this.currentRoundIndex + 1 < this.totalRounds && Math.abs(this.ropePosition) < 100) {
-        this.loadRound(this.currentRoundIndex + 1);
-      } else {
-        this.finishMatch();
-      }
+    // Move to next question after 3.2s or upon pressing Space/Enter
+    if (this.roundEvalTimeout) clearTimeout(this.roundEvalTimeout);
+    this.roundEvalTimeout = setTimeout(() => {
+      this.advanceNextRoundImmediately();
     }, 3200);
+  }
+
+  advanceNextRoundImmediately() {
+    if (this.roundEvalTimeout) {
+      clearTimeout(this.roundEvalTimeout);
+      this.roundEvalTimeout = null;
+    }
+    if (this.currentView !== 'game') return;
+    if (this.currentRoundIndex + 1 < this.totalRounds && Math.abs(this.ropePosition) < 100) {
+      this.loadRound(this.currentRoundIndex + 1);
+    } else {
+      this.finishMatch();
+    }
   }
 
   highlightStationOptions(side, correctIdx, answerState) {
